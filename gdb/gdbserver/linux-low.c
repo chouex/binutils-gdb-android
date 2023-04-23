@@ -104,7 +104,7 @@
 # include "nat/linux-btrace.h"
 # include "gdbsupport/btrace-common.h"
 #endif
-
+#define HAVE_ELF32_AUXV_T
 #ifndef HAVE_ELF32_AUXV_T
 /* Copied from glibc's elf.h.  */
 typedef struct
@@ -119,7 +119,7 @@ typedef struct
     } a_un;
 } Elf32_auxv_t;
 #endif
-
+#define HAVE_ELF64_AUXV_T
 #ifndef HAVE_ELF64_AUXV_T
 /* Copied from glibc's elf.h.  */
 typedef struct
@@ -5906,7 +5906,9 @@ linux_request_interrupt (void)
 {
   /* Send a SIGINT to the process group.  This acts just like the user
      typed a ^C on the controlling terminal.  */
-  kill (-signal_pid, SIGINT);
+  int r = kill (-signal_pid, SIGINT);
+  if (r != 0)
+      kill (signal_pid, SIGINT);
 }
 
 /* Copy LEN bytes from inferior's auxiliary vector starting at OFFSET
